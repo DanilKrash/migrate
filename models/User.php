@@ -2,7 +2,23 @@
 
 namespace app\models;
 
+use Yii;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+
+
+/**
+ * This is the model class for table "{{%user}}".
+ *
+ * @property int $id;
+ * @property string $username;
+ * @property  string $password;
+ * @property string $authKey;
+ * @property  string $accessToken;
+ * @property int $created_at;
+ * @property int $updated_at;
+ * @property string $password_hash; //для безопасности
+ */
 
 class User extends ActiveRecord implements \yii\web\IdentityInterface
 {
@@ -78,7 +94,7 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getAuthKey()
     {
-        return $this->authKey;
+//        return $this->authKey;
     }
 
     /**
@@ -86,7 +102,7 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
      */
     public function validateAuthKey($authKey)
     {
-        return $this->authKey === $authKey;
+//        return $this->authKey === $authKey;
     }
 
     /**
@@ -95,8 +111,15 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
      * @param string $password password to validate
      * @return bool if password provided is valid for current user
      */
-    public function validatePassword($password)
+    public function validatePassword($password, $hash)
     {
-        return $this->password === $password;
+//        return $this->password === $password;
+        Yii::$app -> getSecurity() -> validatePassword($password, $hash);
     }
+
+    public function setPassword($password)
+    {
+        $this -> password_hash = Yii::$app -> getSecurity() -> generatePasswordHash($password);
+    }
+    
 }
