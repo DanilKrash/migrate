@@ -15,8 +15,8 @@ class SignupForm extends Model
 {
     public $username;
     public $name;
-    public $patronimic;
-    public $sername;
+    public $patronymic;
+    public $surname;
     public $password;
     public $email;
     public $password_repeat;
@@ -30,16 +30,13 @@ class SignupForm extends Model
     {
         return [
             // username and password are both required
-            [['username', 'password'], 'required'],
+            [['username', 'password', 'name', 'email', 'patronymic'], 'required'],
             ['username', 'unique', 'targetClass' => '\app\models\User', 'message' => 'Такое имя пользователя занято!'],
-            ['name', 'required'],
-            ['patronimic', 'trim'],
-            ['sername', 'trim'],
+            [['patronymic', 'surname'], 'trim'],
             ['password', 'string', 'min' => 6],
             ['rememberMe', 'boolean'],
             ['email', 'email'],
             ['email', 'string', 'max' => 255],
-            ['email', 'required'],
             ['email', 'trim'],
             ['email', 'unique', 'targetClass' => '\app\models\User', 'message' => 'Такая почта уже занята.'],
             ['password_repeat', 'compare', 'compareAttribute' => 'password']
@@ -50,6 +47,9 @@ class SignupForm extends Model
     {
         $user = new User();
         $user -> username = $this -> username;
+        $user -> name = $this -> name;
+        $user -> patronymic = $this -> patronymic;
+        $user -> surname = $this -> surname;
         $user -> setPassword($this -> password);
         $user -> email = $this -> email;
 

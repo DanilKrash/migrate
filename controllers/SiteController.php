@@ -2,8 +2,11 @@
 
 namespace app\controllers;
 
+use app\models\Category;
+use app\models\News;
 use app\models\SignupForm;
 use Yii;
+use yii\data\Pagination;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
@@ -107,8 +110,8 @@ class SiteController extends Controller
     public function actionContact()
     {
         $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Hi');
 
             return $this->refresh();
         }
@@ -120,21 +123,31 @@ class SiteController extends Controller
     /**
      * Displays about page.
      *
-     * @return string
+     * @return string|Response
      */
-    public function actionAbout()
-    {
-        return $this->render('about');
-    }
 
     public function actionSignup()
     {
         $model = new SignupForm();
-        if($model->load(Yii::$app->request->post())){
-            if($user = $model -> signup()){
-                return $this -> goHome();
+        if ($model->load(Yii::$app->request->post())) {
+            if ($user = $model->signup()) {
+                return $this->goHome();
             }
         }
-        return $this -> render('signup', ['model' => $model]);
+        return $this->render('signup', ['model' => $model]);
+    }
+
+    public function actionAbout()
+    {
+        $query = News::find()->orderBy('date asc');
+        $count = clone $query;
+        $pages = new Pagination(['totalCount' => $count->count(), 'pageSize'=>1]);
+        $news = $query->offset($pages->offset)
+            ->limit($pages->limit)
+            ->all();
+        $popular = News::find()->orderBy('viewd desc')->limit(2)->all();
+        $recent = News::find()->orderBy('date asc')->limit(4)->all();
+        $categories = Category::find()->all();
+        return $this->render('about', ['popular' => $popular, 'recent' => $recent, 'categories' => $categories, 'news' => $news, 'pages' => $pages]);
     }
 }
